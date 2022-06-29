@@ -22,7 +22,6 @@ usersController.register = async (req, res) => {
 usersController.login = async (req, res) => {
     const body = req.body 
     const userData = await User.findOne({ email: body.email })
-    console.log(userData)
     if(!userData) {
         res.json({
              errors: 'invalid email or password'
