@@ -34,10 +34,10 @@ usersController.login = async (req, res) => {
                             email: userData.email,
                             username: userData.username
                         }
-                        // let privateKey = fs.readFile('./private.pem');
+                        let privateKey = await fs.readFile('private.pem');
                         // console.log(privateKey)
-                        const token = jwt.sign(tokenData, 'taaj123', { expiresIn: '2d'})
-                        // const token = jwt.sign(tokenData,{ key: privateKey}, {algorithm: 'RS256'}, {expiresIn: '2d'})
+                        // const token = jwt.sign(tokenData, 'taaj123', { expiresIn: '2d'})
+                        const token = jwt.sign(tokenData,{ key: privateKey}, {algorithm: 'RS256'}, {expiresIn: '2d'})
                         res.json({
                             token: `Bearer ${token}`
                         })

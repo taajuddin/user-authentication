@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/user')
 const fs = require('fs')
-const authenticateUser = (req, res, next) => {
+const authenticateUser = async (req, res, next) => {
     const token = req.header('Authorization').split(' ')[1]
     let tokenData 
     try {
         // tokenData = jwt.verify(token, 'taaj123')
-        var cert = fs.readFileSync('public.pem');
+        var cert = await fs.readFile('public.pem');
         tokenData = jwt.verify(token, cert, { algorithms: ['RS256'] })
         User.findById(tokenData._id)
             .then((user) => {
