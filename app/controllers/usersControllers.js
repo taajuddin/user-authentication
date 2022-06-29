@@ -1,7 +1,7 @@
 const User = require('../models/user')
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const fs = require('fs')
+const fs = require('fs/promises')
 const usersController = {}
 
 usersController.register = async (req, res) => {
@@ -35,9 +35,18 @@ usersController.login = async (req, res) => {
                             username: userData.username
                         }
                         let privateKey = await fs.readFile('private.pem');
-                        // console.log(privateKey)
+
+                        
+                        console.log(privateKey)
                         // const token = jwt.sign(tokenData, 'taaj123', { expiresIn: '2d'})
-                        const token = jwt.sign(tokenData,{ key: privateKey}, {algorithm: 'RS256'}, {expiresIn: '2d'})
+
+                        const token = jwt.sign(tokenData, {
+                            key: privateKey,
+                            passphrase: ''
+                        }, {
+                            algorithm: 'RS256',
+                            expiresIn: '2d'
+                        })
                         res.json({
                             token: `Bearer ${token}`
                         })
