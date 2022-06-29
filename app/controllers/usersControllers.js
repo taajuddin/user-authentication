@@ -1,54 +1,50 @@
 const User = require('../models/user')
 const bcryptjs = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const fs = require('fs')
 const usersController = {}
 
-usersController.register = (req, res) => {
+usersController.register = async (req, res) => {
     const body = req.body 
     const user = new User(body)
-    bcryptjs.genSalt()
-        .then((salt) => {
-            bcryptjs.hash(user.password, salt)
-                .then((encrypted) => {
-                    user.password = encrypted
-                    user.save()
-                        .then((user) => {
-                            res.json(user)
-                        })
-                        .catch((err) => {
-                            res.json(err)
-                        })
-                })
+    const salt = await bcryptjs.genSalt()
+    const encrypted = await  bcryptjs.hash(user.password, salt)
+    user.password = encrypted
+    user.save()
+        .then((user) => {
+            res.json(user)
         })
+        .catch((err) => {
+            res.json(err)
+        })      
 }
 
-usersController.login = (req, res) => {
+usersController.login = async (req, res) => {
     const body = req.body 
-    User.findOne({ email: body.email }) 
-        .then((user) => {
-            if(!user) {
-                res.json({ 
-                    errors: 'invalid email or password'
-                })
-            }
-
-            bcryptjs.compare(body.password, user.password)
-                .then((match) => {
+    const userData = await User.findOne({ email: body.email })
+    console.log(userData)
+    if(!userData) {
+        res.json({
+             errors: 'invalid email or password'
+        })
+    }
+            const match = await bcryptjs.compare(body.password, userData.password)
                     if(match) {
                         const tokenData = {
-                            _id: user._id,
-                            email: user.email,
-                            username: user.username
+                            _id: userData._id,
+                            email: userData.email,
+                            username: userData.username
                         }
+                        // let privateKey = fs.readFile('./private.pem');
+                        // console.log(privateKey)
                         const token = jwt.sign(tokenData, 'taaj123', { expiresIn: '2d'})
+                        // const token = jwt.sign(tokenData,{ key: privateKey}, {algorithm: 'RS256'}, {expiresIn: '2d'})
                         res.json({
                             token: `Bearer ${token}`
                         })
                     } else {
                         res.json({ errors: 'invalid email or password'})
                     }
-                })
-        })
 }
 
 usersController.account = (req, res) => {
